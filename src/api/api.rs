@@ -1,5 +1,5 @@
 use actix_web::web;
-use crate::api::{users, services, services_categories, products_categories, products};
+use crate::api::{users,services, services_categories, products_categories, products};
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(

@@ -7,6 +7,7 @@ pub struct Att {
     #[serde(default)]
     pub id: String,
     pub title: String,
+    #[serde(default)]
     pub category_id: String,
     pub created_at: Option<chrono::NaiveDateTime>,
     pub updated_at: Option<chrono::NaiveDateTime>,
