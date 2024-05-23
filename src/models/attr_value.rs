@@ -6,6 +6,7 @@ use diesel::{Queryable, Insertable, AsChangeset};
 pub struct AttVal {
     #[serde(default)]
     pub attr_id: String,
+    #[serde(default)]
     pub product_id: String,
     pub value: Option<String>,
     pub created_at: Option<chrono::NaiveDateTime>,

@@ -11,7 +11,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .service(products_categories::delete_products_categories_by_id)
         .service(products_categories::update_products_categories_by_id)
         //products
-        .service(products::create_products)
+        .service(products::create_product)
         .service(products::get_product_by_id)
         .service(products::get_products)
         .service(products::delete_product_by_id)

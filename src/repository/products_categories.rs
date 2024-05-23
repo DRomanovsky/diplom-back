@@ -78,14 +78,13 @@ pub mod products_categories {
 
         pub fn delete_products_categories_by_id(&self, products_categories_id: &str) -> Option<usize> {
             let conn = &mut self.pool.get().unwrap();
-            let count = diesel::delete(products_categories.find(products_categories_id))
-                .execute(conn)
-                .expect("Error deleting products categories by id");
-
             diesel::delete(attr.filter(category_id.eq(products_categories_id)))
                 .execute(conn)
                 .expect("Error deleting attributes");
-
+            let count = diesel::delete(products_categories.find(products_categories_id))
+                .execute(conn)
+                .expect("Error deleting products categories by id");
+            
             Some(count)
         }
 
