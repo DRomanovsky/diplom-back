@@ -3,19 +3,11 @@ pub mod users {
     use crate::repository::schema::users::dsl::*;
     use crate::repository::database::Database;
 
-    use core::hash;
     use std::fmt::Error;
     use chrono::prelude::*;
-    use diesel::{prelude::*, query_builder::bind_collector};
+    use diesel::prelude::*;
 
-    use crate::{api::auth_api::TokenClaims};
-    use actix_web_httpauth::extractors::basic::BasicAuth;
-    use argonautica::{Hasher, Verifier};
-    use chrono::NaiveDateTime;
-    use hmac::{Hmac, Mac};
-    use jwt::SignWithKey;
-    use serde::{Deserialize, Serialize};
-    use sha2::Sha256;
+    use argonautica::Hasher;
 
     impl Database{
         pub fn get_users(&self) -> Vec<User> {

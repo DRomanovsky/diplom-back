@@ -7,7 +7,7 @@ use crate::{api::auth_api::TokenClaims, repository::schema::users::dsl::*};
 use hmac::{Hmac, Mac};
 use sha2::Sha256;
 use crate::{models::users::User, repository::database::Database};
-use diesel::{prelude::*, result::Error};
+use diesel::prelude::*;
 
 use serde::{Serialize,Deserialize};
 use diesel::{Queryable, Insertable, AsChangeset};

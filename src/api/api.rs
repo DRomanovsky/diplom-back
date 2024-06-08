@@ -26,7 +26,6 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .service(services::get_services)
         .service(users::auth)
     );
-
     cfg.service(
         web::scope("/protapi")
         .wrap(bearer_middleware)
