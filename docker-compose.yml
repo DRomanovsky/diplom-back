@@ -1,4 +1,18 @@
 services:
+  app:
+    container_name: app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    args:
+      DATABASE_URL: postgresql://root:root@localhost:5432/vashaoptika
+      JWT_SECRET: abvgde
+      HASH_SECRET: abvgd
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    
   db:
     container_name: postgres
     image: postgres:14.7-alpine

@@ -9,6 +9,8 @@ pub struct Product {
     pub title: String,
     pub price: Option<String>,
     pub acc: Option<i32>,
+    pub image: String,
+    pub status: bool, 
     pub category_id: String,
     pub created_at: Option<chrono::NaiveDateTime>,
     pub updated_at: Option<chrono::NaiveDateTime>,

@@ -35,6 +35,9 @@ diesel::table! {
         price -> Nullable<Varchar>,
         acc -> Nullable<Int4>,
         #[max_length = 255]
+        image -> Varchar,
+        status -> Bool,
+        #[max_length = 255]
         category_id -> Varchar,
         created_at -> Nullable<Timestamp>,
         updated_at -> Nullable<Timestamp>,
