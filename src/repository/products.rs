@@ -78,31 +78,30 @@ pub mod products {
             Ok(product)
         }
 
-        pub fn get_product_by_id(&self, other_product_id: &str) -> Option<(Product, Vec<(Att, Vec<AttVal>)>)> {
+        pub fn get_product_by_id(&self, productid: &str) -> Option<(Product, Vec<(Att, AttVal)>)> {
             let conn = &mut self.pool.get().unwrap();
             let product = products
-                .find(other_product_id)
-                .get_result::<Product>(conn)
-                .expect("Error loading product by id");
+                .find(productid)
+                .first::<Product>(conn)
+                .ok()?;
         
             let attrs_with_values = attr
                 .load::<Att>(conn)
                 .expect("Error loading attributes")
                 .into_iter()
-                .map(|att| {
+                .flat_map(|att| {
                     let attr_values = attr_value
                         .filter(attr_id.eq(&att.id))
-                        .filter(product_id.eq(product_id))
+                        .filter(product_id.eq(&product.id))
                         .load::<AttVal>(conn)
                         .expect("Error loading attribute values");
         
-                    (att, attr_values)
+                    attr_values.into_iter().map(move |att_value| (att.clone(), att_value))
                 })
                 .collect::<Vec<_>>();
         
             Some((product, attrs_with_values))
         }
-
         pub fn delete_product_by_id(&self, other_product_id: &str) -> Option<usize> {
             let conn = &mut self.pool.get().unwrap();
             diesel::delete(attr_value.filter(product_id.eq(other_product_id)))

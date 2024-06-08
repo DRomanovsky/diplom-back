@@ -35,16 +35,7 @@ impl ResponseError for MyError {
     }
 }
 
-// #[post("/products")]
-// pub async fn create_products(db: web::Data<Database>, new_product: web::Json<Product>, new_attrs: web::Json<Vec<(String, AttVal)>>) -> HttpResponse {
-//     let product = db.create_product(new_product.into_inner(), new_attrs.into_inner());
-//     match product {
-//         Ok(product) => HttpResponse::Ok().json(product),
-//         Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
-//     }
-// }
 #[post("/products")]
-
 pub async fn create_product(
     db: web::Data<Database>,
     body: web::Bytes,
@@ -53,7 +44,7 @@ pub async fn create_product(
         MyError::CustomError(format!("Invalid JSON: {}", err))
     })?;
 
-    let new_product: Product = serde_json::from_value(json_data.get("new_products").cloned().ok_or_else(|| MyError::CustomError("Missing 'new_products' field".to_string()))?).map_err(|err| MyError::CustomError(format!("Invalid 'new_product': {}", err)))?;
+    let new_product: Product = serde_json::from_value(json_data.get("new_product").cloned().ok_or_else(|| MyError::CustomError("Missing 'new_product' field".to_string()))?).map_err(|err| MyError::CustomError(format!("Invalid 'new_product': {}", err)))?;
 
     let new_products_attr: Vec<(String, AttVal)> = serde_json::from_value(json_data.get("new_products_attr").cloned().ok_or_else(|| MyError::CustomError("Missing 'new_products_attr' field".to_string()))?).map_err(|err| MyError::CustomError(format!("Invalid 'new_products_attr': {}", err)))?;
 

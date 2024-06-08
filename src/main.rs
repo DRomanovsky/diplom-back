@@ -1,22 +1,10 @@
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder, Result};
-use serde::{Serialize, Deserialize};
+use serde::Serialize;
 use actix_cors::Cors;
 
 mod models;
 mod repository;
 mod api;
-
-//Auth
-use actix_web_httpauth::{
-    extractors::{
-        bearer::{self, BearerAuth},
-        AuthenticationError,
-    },
-    middleware::HttpAuthentication,
-};
-use hmac::{Hmac, Mac};
-use jwt::VerifyWithKey;
-use sha2::Sha256;
 
 #[derive(Serialize)]
 pub struct Response {
@@ -47,14 +35,14 @@ async fn main() -> std::io::Result<()> {
     let app_data = web::Data::new(db);
 
     
-    HttpServer::new(move|| {
+    HttpServer::new(move|| {        
         App::new()
-        .app_data(app_data.clone())
-        .configure(api::api::config)
-        .service(healthcheck)
-        .default_service(web::route().to(not_found))
-        .wrap(actix_web::middleware::Logger::default())
-        .wrap(Cors::permissive().supports_credentials())
+            .app_data(app_data.clone())
+            .configure(api::api::config)
+            .service(healthcheck)
+            .default_service(web::route().to(not_found))
+            .wrap(actix_web::middleware::Logger::default())
+            .wrap(Cors::permissive().supports_credentials())
         
     })
     .bind(("0.0.0.0", 8080))?
