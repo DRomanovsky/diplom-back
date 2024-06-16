@@ -10,7 +10,7 @@ pub mod products {
     use std::fmt::Error;
     use chrono::prelude::*;
     use diesel::prelude::*;
-
+    use std::fs::remove_file;
     impl Database {
         pub fn get_products(&self) -> Vec<(Product, Vec<(Att, AttVal)>)> {
             let conn = &mut self.pool.get().unwrap();
@@ -47,12 +47,14 @@ pub mod products {
 
         pub fn create_product(
             &self,
+            image_path: String,
             product: Product,
             attrs_with_values: Vec<(String, AttVal)>,
         ) -> Result<Product, Error> {
             let conn = &mut self.pool.get().unwrap();
             let product = Product {
                 id: uuid::Uuid::new_v4().to_string(),
+                image: image_path,
                 created_at: Some(Utc::now().naive_utc()),
                 updated_at: Some(Utc::now().naive_utc()),
                 ..product
@@ -69,15 +71,52 @@ pub mod products {
                 att_value.created_at = Some(Utc::now().naive_utc());
                 att_value.updated_at = Some(Utc::now().naive_utc());
 
-                    diesel::insert_into(attr_value)
-                        .values(&att_value)
-                        .execute(conn)
-                        .expect("Error creating new attribute value");
-                }
+                diesel::insert_into(attr_value)
+                    .values(&att_value)
+                    .execute(conn)
+                    .expect("Error creating new attribute value");
+            }
 
             Ok(product)
         }
 
+        pub async fn update_product_by_id(
+            &self,
+            other_product_id: &str,
+            image_path: String,
+            mut product: Product,
+            attrs_with_values: Vec<(String, AttVal)>,
+        ) -> Option<Product> {
+            let conn = &mut self.pool.get().unwrap();
+            product.updated_at = Some(Utc::now().naive_utc());
+            let dir: &str = "upload/";
+            let delete_image_path = product.image;
+            remove_file(dir.to_owned() + delete_image_path.as_str()).unwrap();
+
+            product.image = image_path;
+            diesel::update(products.find(other_product_id))
+                .set(&product)
+                .get_result::<Product>(conn)
+                .expect("Error updating product by id");
+
+            diesel::delete(attr_value.filter(product_id.eq(other_product_id)))
+                .execute(conn)
+                .expect("Error deleting attribute values");
+
+            for (att, mut att_value) in attrs_with_values {
+                att_value.attr_id = att;
+                att_value.product_id = product.id.clone();
+                att_value.created_at = Some(Utc::now().naive_utc());
+                att_value.updated_at = Some(Utc::now().naive_utc());
+    
+                diesel::insert_into(attr_value)
+                    .values(&att_value)
+                    .execute(conn)
+                    .expect("Error creating new attribute value");
+                }
+            Some(product)
+        }
+        
         pub fn get_product_by_id(&self, productid: &str) -> Option<(Product, Vec<(Att, AttVal)>)> {
             let conn = &mut self.pool.get().unwrap();
             let product = products
@@ -107,67 +146,18 @@ pub mod products {
             diesel::delete(attr_value.filter(product_id.eq(other_product_id)))
                 .execute(conn)
                 .expect("Error deleting attribute values");
+            let dir: &str = "upload/";
+            let product: Product = products
+                .find(other_product_id)
+                .get_result::<Product>(conn)
+                .expect("Error loading products categories by id");
+            let image_path = product.image;
+            remove_file(dir.to_owned() + image_path.as_str()).unwrap();
             let count = diesel::delete(products.find(other_product_id))
                 .execute(conn)
                 .expect("Error deleting product by id");
             Some(count)
         }
 
-        pub fn update_product_by_id(
-            &self,
-            other_product_id: &str,
-            mut product: Product,
-            attrs_with_values: Vec<(Att, Vec<AttVal>)>,
-        ) -> Option<(Product, Vec<(Att, Vec<AttVal>)>)> {
-            let conn = &mut self.pool.get().unwrap();
-            product.updated_at = Some(Utc::now().naive_utc());
-            diesel::update(products.find(other_product_id))
-                .set(&product)
-                .get_result::<Product>(conn)
-                .expect("Error updating product by id");
-
-            diesel::delete(attr_value.filter(product_id.eq(other_product_id)))
-                .execute(conn)
-                .expect("Error deleting attribute values");
-
-            for (mut att, attr_values) in attrs_with_values {
-                att.id = uuid::Uuid::new_v4().to_string();
-                att.created_at = Some(Utc::now().naive_utc());
-                att.updated_at = Some(Utc::now().naive_utc());
-
-                diesel::insert_into(attr)
-                    .values(&attr)
-                    .execute(conn)
-                    .expect("Error creating new attribute");
-
-                for mut att_value in attr_values {
-                    att_value.attr_id = att.id.clone();
-                    att_value.product_id = product.id.clone();
-                    att_value.created_at = Some(Utc::now().naive_utc());
-                    att_value.updated_at = Some(Utc::now().naive_utc());
-
-                    diesel::insert_into(attr_value)
-                        .values(&attr_value)
-                        .execute(conn)
-                        .expect("Error creating new attribute value");
-                }
-            }
-
-            let attrs = attr
-                .load::<Att>(conn)
-                .expect("Error loading attributes");
-
-            let attrs_with_values = attrs.into_iter().map(|att| {
-                let attr_values = attr_value
-                    .filter(attr_id.eq(&att.id))
-                    .filter(product_id.eq(&product.id))
-                    .load::<AttVal>(conn)
-                    .expect("Error loading attribute values");
-
-                (att, attr_values)
-            }).collect::<Vec<_>>();
-
-            Some((product, attrs_with_values))
-        }
     }
 }

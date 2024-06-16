@@ -31,7 +31,7 @@ pub async fn create_users(db: web::Data<Database>, new_users: web::Json<User>) -
         Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
     }
 }
-#[get("/auth")]
+#[post("/auth")]
 pub async fn auth(db: web::Data<Database>, credentials: BasicAuth) -> impl Responder {
     let jwt_secret: Hmac<Sha256> = Hmac::new_from_slice(
         std::env::var("JWT_SECRET")
@@ -40,7 +40,6 @@ pub async fn auth(db: web::Data<Database>, credentials: BasicAuth) -> impl Respo
     ).unwrap();
     let username = credentials.user_id();
     let password = credentials.password();
-    
     match password {
         None => HttpResponse::Unauthorized().json("Must provide username and password"),
         Some(password) => {

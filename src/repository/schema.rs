@@ -48,6 +48,7 @@ diesel::table! {
     products_categories (id) {
         id -> Varchar,
         title -> Nullable<Varchar>,
+        imagepath -> Nullable<Varchar>,
         created_at -> Nullable<Timestamp>,
         updated_at -> Nullable<Timestamp>,
     }
@@ -74,6 +75,7 @@ diesel::table! {
         id -> Varchar,
         #[max_length = 255]
         name -> Varchar,
+        imagepath -> Nullable<Varchar>,
         created_at -> Nullable<Timestamp>,
         updated_at -> Nullable<Timestamp>,
     }

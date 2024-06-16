@@ -7,6 +7,7 @@ pub struct ServiceCategory {
     #[serde(default)]
     pub id: String,
     pub name: String,
+    pub imagepath: Option<String>,
     pub created_at: Option<chrono::NaiveDateTime>,
     pub updated_at: Option<chrono::NaiveDateTime>,
 }
