@@ -49,6 +49,7 @@ pub async fn create_product(
     db: web::Data<Database>,
     mut payload: Multipart,
 ) -> Result<HttpResponse, MyError> {
+
     let max_file_count: usize = 1;
     let mut current_count: usize = 0;
     let legal_filetypes:[Mime; 3] = [IMAGE_PNG, IMAGE_JPEG, IMAGE_BMP];
@@ -100,9 +101,9 @@ pub async fn create_product(
     let json_data = json_data.ok_or(MyError::CustomError("Missing 'data' field".to_string())).unwrap();
 
     let image_path = dir.to_owned() + &filename.to_string().to_owned() + ".png";
+    
     let new_product: Product = serde_json::from_value(json_data.get("new_product").cloned().ok_or_else(|| MyError::CustomError("Missing 'new_product' field".to_string()))?).map_err(|err| MyError::CustomError(format!("Invalid 'new_product': {}", err)))?;
     let new_products_attr: Vec<(String, AttVal)> = serde_json::from_value(json_data.get("new_products_attr").cloned().ok_or_else(|| MyError::CustomError("Missing 'new_products_attr' field".to_string()))?).map_err(|err| MyError::CustomError(format!("Invalid 'new_products_attr': {}", err)))?;
-
     let products = db
         .create_product(image_path, new_product, new_products_attr)
         .map_err(|e| MyError::Other(Box::new(e)))?;
