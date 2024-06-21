@@ -63,7 +63,7 @@ pub async fn auth(db: web::Data<Database>, credentials: BasicAuth) -> impl Respo
                         return HttpResponse::Unauthorized().json("Incorrect username or password");
                     }
                 }
-                Err(error) => return HttpResponse::InternalServerError().json(format!("{:?} help", error)),
+                Err(error) => return HttpResponse::InternalServerError().json(format!("user {:?}", error)),
             }   
         }
     }

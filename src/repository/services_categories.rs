@@ -49,7 +49,8 @@ pub mod services_categories {
             let count = diesel::delete(services_categories.find(services_categories_id))
             .execute(conn)
             .expect("Error deleting services categories by id");
-            let dir: &str = "upload/";
+            
+            let dir: &str = "./";
             let services_category:ServiceCategory = services_categories
                 .find(services_categories_id)
                 .get_result::<ServiceCategory>(conn)
@@ -66,13 +67,24 @@ pub mod services_categories {
         pub async fn update_services_categories_by_id(&self, services_categories_id: &str, image_path: String, mut service_category: ServiceCategory) -> Option<ServiceCategory> {
             let conn = &mut self.pool.get().unwrap();
             service_category.updated_at = Some(Utc::now().naive_utc());
-            let dir: &str = "upload/";
-            let delete_image_path = service_category.imagepath;
-            match delete_image_path{
-                Some(delete_image_path) => remove_file(dir.to_owned() + delete_image_path.as_str()).unwrap(),
-                None => println!("Error deleting service image")
+            
+            let old_service_category = services_categories
+                .find(services_categories_id)
+                .get_result::<ServiceCategory>(&mut self.pool.get().unwrap())
+                .expect("Error loading services categories by id");
+            let old_image_path;     
+            if image_path == "" {
+                old_image_path = old_service_category.imagepath;
+                service_category.imagepath = old_image_path;
+            } else {
+                service_category.imagepath = Some(image_path);
+                let dir: &str = "./";
+                let delete_image_path = old_service_category.imagepath.clone();
+                match delete_image_path{
+                    Some(delete_image_path) => remove_file(dir.to_owned() + delete_image_path.as_str()).unwrap(),
+                    None => println!("Error deleting service image")
+                }
             }
-            service_category.imagepath = Some(image_path);
             let service_category = diesel::update(services_categories.find(services_categories_id))
                 .set(&service_category)
                 .get_result::<ServiceCategory>(conn)

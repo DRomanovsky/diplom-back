@@ -73,13 +73,24 @@ pub mod products_categories {
         ) -> Option<(ProductCategory, Vec<Att>)> {
             let conn = &mut self.pool.get().unwrap();
             product_category.updated_at = Some(Utc::now().naive_utc());
-            let dir: &str = "upload/";
-            let delete_image_path = product_category.imagepath;
-            match delete_image_path{
-                Some(delete_image_path) => remove_file(dir.to_owned() + delete_image_path.as_str()).unwrap(),
-                None => println!("Error deleting product image")
+
+            let old_product_category = products_categories
+                .find(products_categories_id)
+                .get_result::<ProductCategory>(conn)
+                .expect("Error loading products categories by id");
+            let old_image_path;     
+            if image_path == "" {
+                old_image_path = old_product_category.imagepath;
+                product_category.imagepath = old_image_path;
+            } else {
+                product_category.imagepath = Some(image_path);
+                let dir: &str = "./";
+                let delete_image_path = old_product_category.imagepath.clone();
+                match delete_image_path{
+                    Some(delete_image_path) => remove_file(dir.to_owned() + delete_image_path.as_str()).unwrap(),
+                    None => println!("Error deleting service image")
+                }
             }
-            product_category.imagepath = Some(image_path);
             diesel::update(products_categories.find(products_categories_id))
                 .set(&product_category)
                 .get_result::<ProductCategory>(conn)
@@ -129,7 +140,7 @@ pub mod products_categories {
             diesel::delete(attr.filter(category_id.eq(products_categories_id)))
                 .execute(conn)
                 .expect("Error deleting attributes");
-            let dir: &str = "upload/";
+            let dir: &str = "./";
             let products_category:ProductCategory = products_categories
                 .find(products_categories_id)
                 .get_result::<ProductCategory>(conn)

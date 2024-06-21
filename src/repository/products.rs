@@ -89,11 +89,20 @@ pub mod products {
         ) -> Option<Product> {
             let conn = &mut self.pool.get().unwrap();
             product.updated_at = Some(Utc::now().naive_utc());
-            let dir: &str = "upload/";
-            let delete_image_path = product.image;
-            remove_file(dir.to_owned() + delete_image_path.as_str()).unwrap();
-
-            product.image = image_path;
+            let old_product = products
+                .find(other_product_id)
+                .get_result::<Product>(conn)
+                .expect("Error loading product by id");
+            let old_image_path;     
+            if image_path == "" {
+                old_image_path = old_product.image;
+                product.image = old_image_path;
+            } else {
+                product.image = image_path;
+                let dir: &str = "./";
+                let delete_image_path = old_product.image.clone();
+                remove_file(dir.to_owned() + delete_image_path.as_str()).unwrap();
+            }
             diesel::update(products.find(other_product_id))
                 .set(&product)
                 .get_result::<Product>(conn)
@@ -146,7 +155,7 @@ pub mod products {
             diesel::delete(attr_value.filter(product_id.eq(other_product_id)))
                 .execute(conn)
                 .expect("Error deleting attribute values");
-            let dir: &str = "upload/";
+            let dir: &str = "./";
             let product: Product = products
                 .find(other_product_id)
                 .get_result::<Product>(conn)
