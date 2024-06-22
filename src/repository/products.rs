@@ -114,7 +114,7 @@ pub mod products {
 
             for (att, mut att_value) in attrs_with_values {
                 att_value.attr_id = att;
-                att_value.product_id = product.id.clone();
+                att_value.product_id = other_product_id.to_string();
                 att_value.created_at = Some(Utc::now().naive_utc());
                 att_value.updated_at = Some(Utc::now().naive_utc());
     
