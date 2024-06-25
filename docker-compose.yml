@@ -4,8 +4,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    args:
-      DATABASE_URL: postgresql://root:root@localhost:5432/vashaoptika
+    environment:
+      DATABASE_URL: postgresql://root:root@192.168.0.25:5432/vashaoptika
       JWT_SECRET: abvgde
       HASH_SECRET: abvgd
     restart: always
@@ -25,6 +25,14 @@ services:
       - postgres-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+  nginx:
+    image: nginx:latest
+    ports:
+      - "50080:80"
+      - "50443:443"
+    volumes:
+      - /var/www/html:/usr/share/nginx/html
+    restart: always
 volumes:
   postgres-data:
 

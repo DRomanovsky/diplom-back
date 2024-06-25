@@ -12,28 +12,17 @@ ENV DATABASE_URL=$DATABASE_URL
 ENV JWT_SECRET=$JWT_SECRET
 ENV HASH_SECRET=$HASH_SECRET
 
-## copy the project files
-COPY . .
-
-## install the project dependencies
-RUN cargo build --release
-
-## copy the binary to the final stage
-FROM debian:buster-slim
-
 RUN apt update
-RUN apt install -y libpq-dev
+RUN apt install -y libpq-dev libclang-dev clang
 
 RUN cargo install diesel_cli --no-default-features --features postgres
 
-WORKDIR /usr/local/bin
+COPY . /app/
 
-## copy the binary from the builder stage
-COPY --from=builder /app/target/release/diplom-backv2 .
+COPY .env /app/.env
 
-## expose the port that the application listens on
+RUN cargo build --release
+
 EXPOSE 8080
 
-## run the application
-CMD ["./diplom-backv2"]
-
+ENTRYPOINT ["/bin/bash", "-c", "cargo run --release"]
