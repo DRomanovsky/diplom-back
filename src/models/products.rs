@@ -9,6 +9,7 @@ pub struct Product {
     pub title: String,
     pub price: Option<String>,
     pub acc: Option<i32>,
+    pub description: Option<String>,
     pub image: String,
     pub status: bool, 
     pub category_id: String,

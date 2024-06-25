@@ -211,14 +211,11 @@ async fn update_products_categories_by_id(
         "".to_string()
     };
 
-    let updated_products_categories: ProductCategory = serde_json::from_value(json_data.get("updated_products_categories").cloned().ok_or_else(|| MyError::CustomError("Missing 'updated_products_categories' field".to_string())).unwrap()).map_err(|err| MyError::CustomError(format!("Invalid 'updated_products_categories': {}", err))).unwrap();
-    let updated_products_categories_attr: Vec<Att> = serde_json::from_value(json_data.get("updated_products_categories_attr").cloned().ok_or_else(|| MyError::CustomError("Missing 'updated_products_categories_attr' field".to_string())).unwrap()).map_err(|err| MyError::CustomError(format!("Invalid 'updated_products_categories_attr': {}", err))).unwrap();
-    
+    let updated_products_categories: ProductCategory = serde_json::from_value(json_data.get("updated_products_categories").cloned().ok_or_else(|| MyError::CustomError("Missing 'updated_products_categories' field".to_string())).unwrap()).map_err(|err| MyError::CustomError(format!("Invalid 'updated_products_categories': {}", err))).unwrap();    
     let products_categories = db.update_products_categories_by_id(
         &id,
         image_path,
         updated_products_categories,
-        updated_products_categories_attr
     ).await;
     match products_categories {
         Some(products_categories) => Ok(HttpResponse::Ok().json(products_categories)),

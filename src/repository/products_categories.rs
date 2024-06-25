@@ -69,8 +69,7 @@ pub mod products_categories {
             products_categories_id: &str,
             image_path: String,
             mut product_category: ProductCategory,
-            atts: Vec<Att>,
-        ) -> Option<(ProductCategory, Vec<Att>)> {
+        ) -> Option<ProductCategory> {
             let conn = &mut self.pool.get().unwrap();
             product_category.updated_at = Some(Utc::now().naive_utc());
 
@@ -96,28 +95,7 @@ pub mod products_categories {
                 .get_result::<ProductCategory>(conn)
                 .expect("Error updating product categories by id");
 
-            diesel::delete(attr.filter(category_id.eq(products_categories_id)))
-                .execute(conn)
-                .expect("Error deleting attributes");
-           
-            for mut att in atts {
-                att.id = uuid::Uuid::new_v4().to_string();
-                att.category_id = product_category.id.clone();
-                att.created_at = Some(Utc::now().naive_utc());
-                att.updated_at = Some(Utc::now().naive_utc());
-
-                diesel::insert_into(attr)
-                    .values(&att)
-                    .execute(conn)
-                    .expect("Error creating new attribute");
-            }
-
-            let attrs = attr
-                .filter(category_id.eq(&product_category.id))
-                .load::<Att>(conn)
-                .expect("Error loading attributes");
-
-            Some((product_category, attrs))
+            Some(product_category)
         }
 
         pub fn get_products_categories_by_id(&self, products_categories_id: &str) -> Option<(ProductCategory, Vec<Att>)> {
